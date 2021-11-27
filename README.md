@@ -47,9 +47,9 @@ You can try building on Windows, however I haven't tested if it works.
     
     sudo apt-get install build-essential uuid-dev iasl git gcc-5 nasm python3-distutils
     git clone https://github.com/tianocore/edk2
-    git submodule update --init
     cd edk2
-	git checkout a2c3bf1f2f991614ac97ddcf4b31742e4366c3a5
+    git checkout a2c3bf1f2f991614ac97ddcf4b31742e4366c3a5
+    git submodule update --init
     make -C BaseTools
     . edksetup.sh
 
