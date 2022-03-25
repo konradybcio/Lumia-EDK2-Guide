@@ -29,17 +29,11 @@ If you input hex equations into Google search, it will spit out the answer. Just
 
 0\. Spec A Lumias seem to be even more cursed than I thought. They don't expose uefiplat.cfg, making it harder to make a proper memory map.
 
-## Usage
-**There is probably an already-built package in  releases containing both BootShim.efi and the EDK2 file for Lumia 535.** 
-
-To use it, unzip both files in the EFIESP partition, move BootShim.efi to `\Windows\System32\Boot` and replace either ffuloader.efi or resetphone.efi with the shim file, then add `nointegritychecks` to the specific bcd entry (there are enough google tutorial on how to do it).
-
  ## Setup:
  
-0a. For this guide you'll need a setup consisting of Linux (Ubuntu 18.04, newer releases have errors, other distros not tested) + Windows (WPInternals and such are not available on Linux sadly).
+0a. For this guide you'll need a setup consisting of Linux (Ubuntu is used here as an example) + Windows (WPInternals and such are not available on Linux sadly).
 
-You can have them as dualboot, or you can use a VM (though it's recommended to dualboot since VMs have performance drops). **DO NOT use WSL**, it is not working.
-You can try building on Windows, however I haven't tested if it works.
+Use WSL2, it works pretty well, and gets the job done.
 
 
 
@@ -48,7 +42,7 @@ You can try building on Windows, however I haven't tested if it works.
     sudo apt-get install build-essential uuid-dev iasl git gcc-5 nasm python3-distutils
     git clone https://github.com/tianocore/edk2
     cd edk2
-    git checkout a2c3bf1f2f991614ac97ddcf4b31742e4366c3a5
+    git checkout stable/202011
     git submodule update --init
     make -C BaseTools
     . edksetup.sh
@@ -177,15 +171,15 @@ I've never built EDK2 on Windows or macOS. If you know how to do this, please up
 
 ### Linux
 
-Download the GCC5 compiler provided [here](https://releases.linaro.org/components/toolchain/binaries/7.1-2017.08/arm-linux-gnueabihf/gcc-linaro-7.1.1-2017.08-x86_64_arm-linux-gnueabihf.tar.xz) and unzip it in a safe place(like your home directory or even downloads if you wish)
+Install crossbuild-essentials-arm for building EDK2 for ARM.
 
-Run `source edksetup.sh`, `export GCC5_ARM_PREFIX=path/to/your/toolchain/bin/arm-linux-gnueabihf-` (with the dash at the end)
+Run `source edksetup.sh`, `export GCC5_ARM_PREFIX=arm-linux-gnueabihf-` (with the dash at the end)
 
 
 Run `build -a ARM -p LumiaXXXPkg/LumiaXXX.dsc -t GCC5 -j$(nproc) -s -n 0` (replace XXX with the device you are building for, for example for a Lumia 535 you would replace it with `Lumia535Pkg/Lumia535.dsc`)
 
 
-Go to /your/edk2/path/Build/LumiaXXX-ARM/DEBUG_GCC5/FV/ and run `/path/to/your/toolchain/bin/arm-linux-gnueabihf-objcopy -I binary -O elf32-littlearm --binary-architecture arm MSMxyza_EFI.fd MSMxyza_EFI.fd.elf && /path/to/your/toolchain/bin/arm-linux-gnueabihf-ld MSMxyza_EFI.fd.elf -T ../../../../LumiaXXXPkg/FvWrapper.ld -o emmc_appsboot.mbn`
+Go to /your/edk2/path/Build/LumiaXXX-ARM/DEBUG_GCC5/FV/ and run `/path/to/your/toolchain/bin/arm-linux-gnueabihf-objcopy -I binary -O elf32-littlearm --binary-architecture arm MSMxyza_EFI.fd MSMxyza_EFI.fd.elf && /path/to/your/toolchain/bin/arm-linux-gnueabihf-ld MSMxyza_EFI.fd.elf -T ../../../../LumiaXXXPkg/FvWrapper.ld -o emmc_appsboot.mbn` (xyza is from your LumiaXXX.fd file)
 
 
 
