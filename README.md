@@ -39,7 +39,7 @@ Use WSL2, it works pretty well, and gets the job done.
 
  Open a terminal window, most thins will be done here. Below are all the commands you have to run to get EDK2 downloaded.
     
-    sudo apt-get install build-essential crossbuild-essential-armhf uuid-dev iasl git gcc-5 nasm python3-distutils
+    sudo apt-get install build-essential crossbuild-essential-armhf uuid-dev iasl git nasm python3-distutils
     git clone https://github.com/tianocore/edk2
     cd edk2
     git checkout stable/202011
