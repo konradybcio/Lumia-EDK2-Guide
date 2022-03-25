@@ -39,7 +39,7 @@ Use WSL2, it works pretty well, and gets the job done.
 
  Open a terminal window, most thins will be done here. Below are all the commands you have to run to get EDK2 downloaded.
     
-    sudo apt-get install build-essential uuid-dev iasl git gcc-5 nasm python3-distutils
+    sudo apt-get install build-essential crossbuild-essential-armhf uuid-dev iasl git gcc-5 nasm python3-distutils
     git clone https://github.com/tianocore/edk2
     cd edk2
     git checkout stable/202011
@@ -154,6 +154,8 @@ When copying clocks from msmXYZA to msm8974/msm8612 always run "find and replace
 Now it's finally time to build.
 
 
+## Fix the compiling errors for newer branch of EDK2 (for Lumia930Pkg based packages)
+Since we're gonna use the branch stable/202011, if you're basing on Lumia930Pkg, you're gonna have to make a few changes so it can compile, pick [this commit](https://github.com/sonic011gamer/Lumia535Pkg/commit/c6e6cdea162b062f60a0b28b10c9e747f84791e5)
 
 ## Building
 
@@ -164,14 +166,9 @@ If you're on Linux, use bash. `zsh` sadly won't work...
 
 ### The Blue and the Fruity platforms
 
-
-I've never built EDK2 on Windows or macOS. If you know how to do this, please update this guide here.
-
-
+To build from Windows, please use WSL2 with the Linux instructions down below.
 
 ### Linux
-
-Install crossbuild-essentials-arm for building EDK2 for ARM.
 
 Run `source edksetup.sh`, `export GCC5_ARM_PREFIX=arm-linux-gnueabihf-` (with the dash at the end)
 
