@@ -14,6 +14,8 @@ Lumia535Pkg: https://github.com/konradybcio/Lumia535Pkg
 
 EDK2: https://github.com/tianocore/edk2 (confirmed working as of HEAD a2c3bf1f2f991614ac97ddcf4b31742e4366c3a5)
 
+BootShim: https://github.com/imbushuo/boot-shim
+
 Cross-compilation toolchain (or just a toolchain if you're compiling on arm 🤷‍): Literally any GCC >=5, but you will probably want this one: https://releases.linaro.org/components/toolchain/binaries/7.1-2017.08/arm-linux-gnueabihf/gcc-linaro-7.1.1-2017.08-x86_64_arm-linux-gnueabihf.tar.xz
 
 Platform reference: https://github.com/efidroid/projectmanagement/wiki/%5BReference%5D-Chipsets
@@ -27,31 +29,34 @@ If you input hex equations into Google search, it will spit out the answer. Just
 
 0\. Spec A Lumias seem to be even more cursed than I thought. They don't expose uefiplat.cfg, making it harder to make a proper memory map.
 
+ ## Setup:
+ 
+0a. For this guide you'll need a setup consisting of Linux (Ubuntu is used here as an example) + Windows (WPInternals and such are not available on Linux sadly).
+
+Use WSL2, it works pretty well, and gets the job done.
 
 
 
-0a. Install Linux. Please. You will want to use both OSes to work with your Lumia to take advantage of tools like ripgrep and find, so to save yourself some trouble create a setup consisting of Linux+Windows, either on two separate machines or using virtualization. Or use WSL if you're crazy.
+ Open a terminal window, most thins will be done here. Below are all the commands you have to run to get EDK2 downloaded.
+    
+    sudo apt-get install build-essential crossbuild-essential-armhf uuid-dev iasl git nasm python3-distutils
+    git clone https://github.com/tianocore/edk2
+    cd edk2
+    git checkout stable/202011
+    git submodule update --init
+    make -C BaseTools
+    . edksetup.sh
+
+After setting up EDK2, you're gonna have to get your LumiaPkg cloned into the EDK2 directory so you can build EDK2.
+
+For Lumia 535 you would do `git clone https://github.com/konradybcio/Lumia535Pkg`
 
 
 
+Below lies the tutorial to porting EDK2 to a new device.
+**Click [here](https://github.com/konradybcio/Lumia-EDK2-Guide/blob/master/README.md#building) to skip to building in case you just want to build.**
 
-0b. Install some dependencies as pointed out here:
-
-
-
-
-* Windows: https://github.com/tianocore/tianocore.github.io/wiki/Windows-systems
-
-* Linux: https://github.com/tianocore/tianocore.github.io/wiki/Using-EDK-II-with-Native-GCC
-
-
-
-
-0c. Get EDK2 source (`git clone https://github.com/tianocore/edk2`). `cd` into edk2 directory and clone LumiaXXXPkg there.
-
-
-
-
+## Porting
 
 1\. Check your device's SoC and the version of MDP that it uses. To do this, get LK source and check the file `platform/msm_shared/rules.mk`. Then look for the SoC that your phone is based on and under its name, there should be an include like `$(LOCAL_DIR)/mdp4.o \`.
 
@@ -149,6 +154,8 @@ When copying clocks from msmXYZA to msm8974/msm8612 always run "find and replace
 Now it's finally time to build.
 
 
+## Fix the compiling errors for newer branch of EDK2 (for Lumia930Pkg based packages)
+Since we're gonna use the branch stable/202011, if you're basing on Lumia930Pkg, you're gonna have to make a few changes so it can compile, pick [this commit](https://github.com/sonic011gamer/Lumia535Pkg/commit/c6e6cdea162b062f60a0b28b10c9e747f84791e5)
 
 ## Building
 
@@ -159,22 +166,17 @@ If you're on Linux, use bash. `zsh` sadly won't work...
 
 ### The Blue and the Fruity platforms
 
-
-I've never built EDK2 on Windows or macOS. If you know how to do this, please update this guide here.
-
-
+To build from Windows, please use WSL2 with the Linux instructions down below.
 
 ### Linux
 
+Run `source edksetup.sh`, `export GCC5_ARM_PREFIX=arm-linux-gnueabihf-` (with the dash at the end)
 
 
-Run `source edksetup.sh`, `export GCC5_ARM_PREFIX=path/to/your/toolchain/something-` (with the dash at the end)
+Run `build -a ARM -p LumiaXXXPkg/LumiaXXX.dsc -t GCC5 -j$(nproc) -s -n 0` (replace XXX with the device you are building for, for example for a Lumia 535 you would replace it with `Lumia535Pkg/Lumia535.dsc`)
 
 
-Run `build -a ARM -p LumiaXXXPkg/LumiaXXX.dsc -t GCC5 -j$(nproc) -s -n 0`
-
-
-Go to Build/LumiaXXX-ARM/DEBUG_GCC5/FV/ and run `/path/to/your/toolchain/something-objcopy -I binary -O elf32-littlearm --binary-architecture arm MSMxyza_EFI.fd MSMxyza_EFI.fd.elf && /path/to/your/toolchain/something-ld MSMxyza_EFI.fd.elf -T ../../../../LumiaXXXPkg/FvWrapper.ld -o emmc_appsboot.mbn`
+Go to /your/edk2/path/Build/LumiaXXX-ARM/DEBUG_GCC5/FV/ and run `/path/to/your/toolchain/bin/arm-linux-gnueabihf-objcopy -I binary -O elf32-littlearm --binary-architecture arm MSMxyza_EFI.fd MSMxyza_EFI.fd.elf && /path/to/your/toolchain/bin/arm-linux-gnueabihf-ld MSMxyza_EFI.fd.elf -T ../../../../LumiaXXXPkg/FvWrapper.ld -o emmc_appsboot.mbn` (xyza is from your LumiaXXX.fd file)
 
 
 
@@ -197,3 +199,5 @@ Credits:
 - CAF for releasing lk sources,
 
 - @konradybcio (me) for spending a few minutes writing this guide up.
+
+- @sonic011gamer for spending a few minutes getting into detail.
